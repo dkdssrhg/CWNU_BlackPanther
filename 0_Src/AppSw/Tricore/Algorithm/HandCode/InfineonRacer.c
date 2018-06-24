@@ -39,6 +39,8 @@ int pixel_count_cross;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
+void adj_value(pixel_RightCount,pixel_LeftCount);
+
 /******************************************************************************/
 /*------------------------Private Variables/Constants-------------------------*/
 /******************************************************************************/
@@ -76,9 +78,11 @@ void InfineonRacer_detectLane(void){
 	}
 }
 
+
 void InfineonRacer_control(void){
 
 }
+
 
 void FindIndex( void )
 {
@@ -118,8 +122,11 @@ void FindIndex( void )
 		}
 	}
 	index_right = pixel_right_sum / pixel_RightCount;
-	pixel_RightCount = 0.0;
+
+	adj_value(pixel_RightCount,pixel_LeftCount);
 }
+
+
 
 void Find_Cross(void)
 {
@@ -142,6 +149,8 @@ void Find_Cross(void)
 	}
 }
 
+
+
 void Control_Velocity (void)
 {
 	if(status == normal)
@@ -152,5 +161,23 @@ void Control_Velocity (void)
 	if(status == v_limit)
 	{
 		IR_Motor.Motor0Vol = 0.15;
+	}
+}
+
+
+
+void adj_value(RightCount,LeftCount)		// 커브 도중 중간에 들어오는 라인을 무시하기 위해서 사용
+{
+	if((RightCount > 0) && (LeftCount > 0))
+	{
+		if((index_left >20) && (index_left <63.5))
+		{
+			index_left = 0;
+		}
+		if((index_right > 63.5) && (index_right <100))
+		{
+			index_right = 0;
+		}
+
 	}
 }
