@@ -62,6 +62,11 @@ void InfineonRacer_detectLane(void){
 	error_left = 63.5 - index_left;		// 가운데에서 왼쪽의 검은선 까지의 픽셀거리
 	error_right = index_right - 63.5;	// 가운데에서 오른쪽의 검은선 까지의 픽셀거리
 
+	if (error_right <= 0)
+	{
+		error_right = 63.5;
+	}
+
 	if( error_left - error_right > 5 )	// 왼쪽의 픽셀거리가 더 크면 좌회전
 	{
 		IR_getSrvAngle() = -0.1;
