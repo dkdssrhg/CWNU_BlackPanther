@@ -97,7 +97,7 @@ void FindIndex( void )
 
 	for(pixel_left = 0; pixel_left <= 63; pixel_left++)		// ÁÂÃøÀÇ Èæ»ö ÇÈ¼¿ Ä«¿îÆ®
 	{
-		if(IR_LineScan.adcResult[1][pixel_left] < 2000)
+		if(IR_LineScan.adcResult[1][pixel_left] < 1500)
 		{
 			pixel_left_sum = pixel_left + pixel_left_sum;	// ÇÈ¼¿ ³Ñ¹ö ÃÑÇÕ
 			pixel_LeftCount++;									// Ä«¿îÆ® µÈ ÇÈ¼¿ ¼ö
@@ -110,7 +110,7 @@ void FindIndex( void )
 
 	for(pixel_right = 64; pixel_right < 128; pixel_right++)	// ¿ìÃøÀÇ Èæ»ö ÇÈ¼¿ Ä«¿îÆ®
 	{
-		if(IR_LineScan.adcResult[1][pixel_right] < 2000)
+		if(IR_LineScan.adcResult[1][pixel_right] < 1500)
 		{
 			pixel_right_sum = pixel_right + pixel_right_sum;
 			pixel_RightCount++;
