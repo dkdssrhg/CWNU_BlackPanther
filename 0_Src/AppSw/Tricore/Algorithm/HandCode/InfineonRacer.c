@@ -39,7 +39,7 @@ int pixel_count_cross;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
-void adj_value(pixel_RightCount,pixel_LeftCount);
+void adj_value(float pixel_RightCount,float pixel_LeftCount);
 
 /******************************************************************************/
 /*------------------------Private Variables/Constants-------------------------*/
@@ -166,7 +166,7 @@ void Control_Velocity (void)
 
 
 
-void adj_value(RightCount,LeftCount)		// 커브 도중 중간에 들어오는 라인을 무시하기 위해서 사용
+void adj_value(float RightCount,float LeftCount)		// 커브 도중 중간에 들어오는 라인을 무시하기 위해서 사용
 {
 	if((RightCount > 0) && (LeftCount > 0))
 	{
