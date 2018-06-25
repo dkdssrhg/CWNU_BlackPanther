@@ -40,6 +40,7 @@ int pixel_count_cross;
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
 void adj_value(float pixel_RightCount,float pixel_LeftCount);
+void InfineonRacer_ControlSrv(float error_value);
 
 /******************************************************************************/
 /*------------------------Private Variables/Constants-------------------------*/
@@ -58,26 +59,29 @@ void InfineonRacer_detectLane(void){
 
 	float error_left=0;
 	float error_right=0;
+	float error;
 
 	error_left = 63.5 - index_left;		// 가운데에서 왼쪽의 검은선 까지의 픽셀거리
 	error_right = index_right - 63.5;	// 가운데에서 오른쪽의 검은선 까지의 픽셀거리
+	error = error_left - error_right;
 
 	if (error_right <= 0)
 	{
 		error_right = 63.5;
 	}
 
-	if( error_left - error_right > 5 )	// 왼쪽의 픽셀거리가 더 크면 좌회전
+
+	if( error > 5 )	// 왼쪽의 픽셀거리가 더 크면 좌회전
 	{
 		IR_getSrvAngle() = -0.1;
 	}
 
-	if (error_left - error_right < -5)	// 오른쪽의 픽셀거리가 더 크면 우회전
+	if (error < -5)	// 오른쪽의 픽셀거리가 더 크면 우회전
 	{
 		IR_getSrvAngle() = 0.1;
 	}
 
-	if ( (error_left - error_right > -5) && (error_left - error_right < 5) )	// 큰 차이가 없으면 직진
+	if ( (error > -5) && (error < 5) )	// 큰 차이가 없으면 직진
 	{
 		IR_getSrvAngle() = 0.0;
 	}
@@ -185,4 +189,9 @@ void adj_value(float RightCount,float LeftCount)		// 커브 도중 중간에 들어오는 �
 		}
 
 	}
+}
+
+void InfineonRacer_ControlSrv(float error_value){
+	;
+
 }
