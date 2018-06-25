@@ -35,6 +35,7 @@ float index_left;
 float index_right;
 
 int pixel_count_cross;
+uint32 Find_Timecnt;
 
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
@@ -54,6 +55,7 @@ void InfineonRacer_init(void)
 	IR_setMotor0En(0.0);
 	IR_Motor.Motor0Vol = 0.25;
 	IR_getSrvAngle() = 0.0;
+	Find_Timecnt = 0;
 }
 
 void InfineonRacer_detectLane(void)
@@ -127,22 +129,30 @@ void FindIndex( void )
 
 void Find_Cross(void)
 {
-	if(pixel_count_cross >= 50)	// 0~128픽셀 중 흑색 픽셀이 50이상인 경우
+
+	Find_Timecnt++;
+
+	if((pixel_count_cross >= 50) && (Find_Timecnt >= 50))	// 0~128픽셀 중 흑색 픽셀이 50이상인 경우, status가 1초 주기로 변경된다.
 	{
 		if(status == normal)		// normal 상태이면
 		{
 			status = v_limit;		// 속도제한 구간에 들어온 상태로 변경
 			IR_setBeeperOn(TRUE);	// Beep ON해서 알 수 있게 함.
-			status_count = 0;
+			Find_Timecnt = 0;
 		}
 
 		if(status == v_limit)		// v_limit 상태이면
 		{
 			status = normal;		// 속도제한 구간에서 나가는 상태
 			IR_setBeeperOn(FALSE);	// Beep OFF로 알 수 있게 함.
-			status_count = 0;
+			Find_Timecnt = 0;
 		}
-	pixel_count_cross = 0;			// count variable 초기화
+
+		if(Find_Timecnt >= 1000)
+		{
+			Find_Timecnt = 0;
+		}
+
 	}
 }
 
