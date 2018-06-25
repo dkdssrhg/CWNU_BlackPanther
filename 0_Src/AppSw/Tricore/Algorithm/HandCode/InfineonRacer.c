@@ -122,7 +122,7 @@ void FindIndex( void )
 	}
 	index_right = pixel_right_sum / pixel_RightCount;
 
-	adj_value(pixel_RightCount,pixel_LeftCount);
+	adj_value(pixel_RightCount,pixel_LeftCount);		//커브중에 LSC의  20 ~ 100픽셀에 추가되는 값들을 무시한다.
 }
 
 
@@ -141,7 +141,7 @@ void Find_Cross(void)
 			Find_Timecnt = 0;
 		}
 
-		if(status == v_limit)		// v_limit 상태이면
+		else if(status == v_limit)		// v_limit 상태이면
 		{
 			status = normal;		// 속도제한 구간에서 나가는 상태
 			IR_setBeeperOn(FALSE);	// Beep OFF로 알 수 있게 함.
@@ -150,7 +150,7 @@ void Find_Cross(void)
 
 		if(Find_Timecnt >= 1000)
 		{
-			Find_Timecnt = 0;
+			Find_Timecnt = 1000;
 		}
 
 	}

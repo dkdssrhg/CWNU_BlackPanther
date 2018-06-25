@@ -49,6 +49,7 @@ void appTaskfu_10ms(void)
 		BasicLineScan_run();
 		FindIndex();
 		Find_Cross();
+		Control_Velocity();
 		InfineonRacer_detectLane();
 		BasicPort_run();
 		BasicGtmTom_run();
