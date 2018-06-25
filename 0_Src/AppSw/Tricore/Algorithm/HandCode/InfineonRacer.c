@@ -49,14 +49,15 @@ void InfineonRacer_ControlSrv(float error_value);
 /******************************************************************************/
 /*-------------------------Function Implementations---------------------------*/
 /******************************************************************************/
-void InfineonRacer_init(void){
+void InfineonRacer_init(void)
+{
 	IR_setMotor0En(0.0);
 	IR_Motor.Motor0Vol = 0.25;
 	IR_getSrvAngle() = 0.0;
 }
 
-void InfineonRacer_detectLane(void){
-
+void InfineonRacer_detectLane(void)
+{
 	float error_left=0;
 	float error_right=0;
 	float error;
@@ -70,25 +71,12 @@ void InfineonRacer_detectLane(void){
 		error_right = 63.5;
 	}
 
-
-	if( error > 5 )	// 왼쪽의 픽셀거리가 더 크면 좌회전
-	{
-		IR_getSrvAngle() = -0.1;
-	}
-
-	if (error < -5)	// 오른쪽의 픽셀거리가 더 크면 우회전
-	{
-		IR_getSrvAngle() = 0.1;
-	}
-
-	if ( (error > -5) && (error < 5) )	// 큰 차이가 없으면 직진
-	{
-		IR_getSrvAngle() = 0.0;
-	}
+	InfineonRacer_ControlSrv(error);
 }
 
 
-void InfineonRacer_control(void){
+void InfineonRacer_control(void)
+{
 
 }
 
@@ -191,7 +179,30 @@ void adj_value(float RightCount,float LeftCount)		// 커브 도중 중간에 들어오는 �
 	}
 }
 
-void InfineonRacer_ControlSrv(float error_value){
-	;
+void InfineonRacer_ControlSrv(float error_value)   //error_value에 따라 서브모터의 angle 을 변형시킨다.
+{
+	if( error_value < -10 )
+		{
+			IR_getSrvAngle() = 0.2;
+		}
 
+	if ((error_value >= -10) && (error_value <= -5))
+		{
+			IR_getSrvAngle() = 0.1;
+		}
+
+	if ( (error_value > -5) && (error_value < 5) )
+		{
+			IR_getSrvAngle() = 0.0;
+		}
+
+	if( (error_value >= 5) && (error_value <= 10) )
+		{
+			IR_getSrvAngle() = -0.1;
+		}
+
+	if( error_value > 10 )
+		{
+			IR_getSrvAngle() = -0.2;
+		}
 }
