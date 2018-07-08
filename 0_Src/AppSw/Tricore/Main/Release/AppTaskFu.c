@@ -5,6 +5,9 @@ static sint32 task_cnt_10m = 0;
 static sint32 task_cnt_100m = 0;
 static sint32 task_cnt_1000m = 0;
 
+float IR_Result[20];
+int timecnt=0;
+
 boolean task_flag_1m = FALSE;
 boolean task_flag_10m = FALSE;
 boolean task_flag_100m = FALSE;
@@ -31,10 +34,22 @@ void appTaskfu_init(void){
 void appTaskfu_1ms(void)
 {
 	task_cnt_1m++;
+	BasicVadcBgScan_run();
+	IR_Result[(task_cnt_1m-1) % 20] = IR_getChn15();
+
+
+
+	if(task_cnt_1m%20 == 0){
+	InfineonRacer_IrScan();
+	AsclinShellInterface_ShowIrAvg();
+	}
+
+
 	if(task_cnt_1m == 1000){
 		task_cnt_1m = 0;
 	}
 
+	timecnt++;
 }
 
 
@@ -47,13 +62,9 @@ void appTaskfu_10ms(void)
 
 	if(task_cnt_10m%2 == 0){
 		BasicLineScan_run();
-		FindIndex();
-		Find_Cross();
-		Control_Velocity();
 		InfineonRacer_detectLane();
 		BasicPort_run();
 		BasicGtmTom_run();
-		BasicVadcBgScan_run();
 
 		if(IR_Ctrl.basicTest == FALSE){
 			#ifdef CODE_ERT
