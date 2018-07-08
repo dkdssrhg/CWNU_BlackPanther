@@ -149,6 +149,54 @@ uint16 Find_BlackLine(uint16 Start, uint16 Final, uint16 LR)
 	return LineK;
 }
 
+/*detect cross*/
+void InfineonRacer_detectCross(void)
+{
+	int i;
+	int Black_cnt = 0;
+	uint16 var;
+	static uint16 Change_cnt = 0;
+
+	Change_cnt++;
+	for(i = Left_pre_line; i <= Right_pre_line; i++)
+	{
+		var = IR_LineScan.adcResult[1][i]*0.9;
+		if(IR_LineScan.adcResult[1][i+1] < var)
+					Black_cnt++;
+	}
+	if(Black_cnt >= 3 && Change_cnt >= 50)
+	{
+		switch (Road_State)
+		{
+			case 1:
+				Road_State = CROSSIN;
+				Change_cnt = 0;
+				break;
+
+			case 3:
+				Road_State = CROSSOUT;
+				Change_cnt = 0;
+				break;
+
+			default:
+				break;
+		}
+	}
+	if(Change_cnt >= 1000) Change_cnt = 1000;
+}
+
+void InfineonRacer_IrScan(void){
+	uint32 i;
+	for(i = 0;i <= 19;){
+		IrSum = IrSum + IR_Result[i++];
+	}
+	IrAvg = IrSum/20;
+	IrSum = 0;
+
+}
+
+
+
 void InfineonRacer_detectLane(void){
 	uint16 Left = 0, Right = 1;
 
@@ -274,12 +322,13 @@ void InfineonRacer_detectLane(void){
 	if (OFFSET < S_START)		OFFSET = S_START;
 	else if (OFFSET > S_FINISH)	OFFSET = S_FINISH;
 
-
 	if(Road_State == NORMAL || Road_State == DASHLINE)
 		{
 			InfineonRacer_detectCross();
 		}
 }
+
+/*******************************************PD control*******************************************/
 
 float Steer_Control_PD(void)
 {
@@ -318,6 +367,8 @@ float MotorDuty_Reference(float MotorDutyMax)
 
 	return MotorDutyRef;
 }
+
+/*******************************************Con_BackCnt*******************************************/
 
 float MotorDuty_Con_BackCnt(float MotorDutyRef)
 {
@@ -358,6 +409,7 @@ float MotorDuty_Con_BackCnt(float MotorDutyRef)
 	return MotorDuty;
 }
 
+/*-------------------------InfineonRacer_control---------------------------*/
 
 void InfineonRacer_control(void)
 {
@@ -566,51 +618,6 @@ void InfineonRacer_control(void)
 	}
 }
 
-void InfineonRacer_IrScan(void){
-	uint32 i;
-	for(i = 0;i <= 19;){
-		IrSum = IrSum + IR_Result[i++];
-	}
-	IrAvg = IrSum/20;
-	IrSum = 0;
-
-}
-
-/*detect cross*/
-void InfineonRacer_detectCross(void)
-{
-	int i;
-	int Black_cnt = 0;
-	uint16 var;
-	static uint16 Change_cnt = 0;
-
-	Change_cnt++;
-	for(i = Left_pre_line; i <= Right_pre_line; i++)
-	{
-		var = IR_LineScan.adcResult[1][i]*0.9;
-		if(IR_LineScan.adcResult[1][i+1] < var)
-					Black_cnt++;
-	}
-	if(Black_cnt >= 3 && Change_cnt >= 50)
-	{
-		switch (Road_State)
-		{
-			case 1:
-				Road_State = CROSSIN;
-				Change_cnt = 0;
-				break;
-
-			case 3:
-				Road_State = CROSSOUT;
-				Change_cnt = 0;
-				break;
-
-			default:
-				break;
-		}
-	}
-	if(Change_cnt >= 1000) Change_cnt = 1000;
-}
 
 
 /********** AVOID OBJECTS FUNCTION **********/
