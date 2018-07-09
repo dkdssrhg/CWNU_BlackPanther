@@ -58,7 +58,7 @@ sint16 ERROR_steer, ERROR_steer_old;
 uint16 skip_n = 1;
 float Percent_n = 0.8; //Num = 13, PercentDen = 16;
 
-uint16 skip_c = 2;
+uint16 skip_c = 3;
 float Percent_c = 0.5;
 
 float SteerDuty, SteerDutyMax = 0.17;
@@ -118,7 +118,7 @@ uint16 Find_BlackLine(uint16 Start, uint16 Final, uint16 LR)
 {
 	uint16 k;
 	uint16 Left = 0, Right = 1;
-	uint16 var1, LineK = 0;
+	uint32 var1, LineK = 0;
 
 	if (LR == Left)			// Left scan
 	{
@@ -158,12 +158,12 @@ void InfineonRacer_detectCross(void)
 {
 	int i;
 	int Black_cnt = 0;
-	uint16 var;
+	uint32 var;
 	static uint16 Change_cnt = 0;
 
 	Change_cnt++;
-//	for(i = Left_pre_line; i <= Right_pre_line - skip_c - 1; i++)
-	for(i = L_0; i <= R_0 - skip_c - 1; i++)
+	for(i = Left_pre_line; i <= Right_pre_line - skip_c - 1; i++)
+//	for(i = L_0; i <= R_0 - skip_c - 1; i++)
 	{
 		var = IR_LineScan.adcResult[1][i]*Percent_c;
 		if(IR_LineScan.adcResult[1][i+ skip_c + 1] < var)
@@ -205,8 +205,8 @@ void InfineonRacer_IrScan(void){
 void InfineonRacer_detectLane(void){
 	uint16 Left = 0, Right = 1;
 
-//	Left_pre_line = Left_line;
-//	Right_pre_line = Right_line;
+	Left_pre_line = Left_line;
+	Right_pre_line = Right_line;
 
 	switch (SCAN_STATE)
 	{
