@@ -58,7 +58,7 @@ sint16 ERROR_steer, ERROR_steer_old;
 uint16 skip_n = 1;
 float Percent_n = 0.8; //Num = 13, PercentDen = 16;
 
-uint16 skip_c = 3;
+uint16 skip_c = 4;
 float Percent_c = 0.5;
 
 float SteerDuty, SteerDutyMax = 0.17;
