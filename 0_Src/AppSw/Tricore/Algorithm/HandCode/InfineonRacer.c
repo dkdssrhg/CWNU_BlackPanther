@@ -58,7 +58,7 @@ sint16 ERROR_steer, ERROR_steer_old;
 uint16 skip_n = 1;
 float Percent_n = 0.8; //Num = 13, PercentDen = 16;
 
-uint16 skip_c = 4;
+uint16 skip_c = 5;
 float Percent_c = 0.5;
 
 float SteerDuty, SteerDutyMax = 0.17;
@@ -163,13 +163,13 @@ void InfineonRacer_detectCross(void)
 
 	Change_cnt++;
 	for(i = Left_pre_line; i <= Right_pre_line - skip_c - 1; i++)
-//	for(i = L_0; i <= R_0 - skip_c - 1; i++)
+//	for(i = L_0+10; i <= R_0 -10 - skip_c - 1; i++)
 	{
 		var = IR_LineScan.adcResult[1][i]*Percent_c;
 		if(IR_LineScan.adcResult[1][i+ skip_c + 1] < var)
 					Black_cnt++;
 	}
-	if(Black_cnt >= 3 && Change_cnt >= 50)
+	if(Black_cnt >= 4 && Change_cnt >= 50)
 	{
 		switch (Road_State)
 		{
@@ -331,7 +331,7 @@ void InfineonRacer_detectLane(void){
 		if (OFFSET < S_START)		OFFSET = S_START;
 		else if (OFFSET > S_FINISH)	OFFSET = S_FINISH;
 	}
-	else if(Road_State == CROSSIN || Road_State == CROSSOUT)
+	else if(Road_State == CROSSIN || Road_State == CROSSOUT || Road_State == LANECHANGE)
 	{
 		OFFSET = S_CENTER;
 	}
@@ -389,7 +389,7 @@ float MotorDuty_Con_BackCnt(float MotorDutyRef)
 	static sint16 BackCnt = 0;
 	static float MotorDutyRef_old = 0.0;
 	float MotorDuty;
-	float BackDuty = -0.2, DiffDecel = -0.07, BackCntGain = 10.0;
+	float BackDuty = -0.2, DiffDecel = -0.06, BackCntGain = 10.0;
 
 	switch (Decel_State)
 	{
@@ -434,9 +434,9 @@ void InfineonRacer_control(void)
 //	float MotorDuty, MotorDutyMax = 0.35, MotorDutyMin = 0.2;
 	uint16 Left, Right;
 	uint16 Left_dashline, Right_dashline;
-	static uint16 LaneChange_cnt = 0;
+	static uint16 Road_cnt = 0;
 	static boolean LaneChange_state = 0;
-	float IRValue, ActDistance = 0.5;
+	float IRValue, ActDistance = 0.4;
 	float MotorDutyRef;
 
 //	Road_State = BLT.Scanstate;
@@ -449,9 +449,9 @@ void InfineonRacer_control(void)
 
 		IR_getSrvAngle() = Steer_Control_PD();
 
-		MotorDutyRef = MotorDuty_Reference(0.35);
-//		IR_Motor.Motor0Vol = MotorDutyRef;
-		IR_Motor.Motor0Vol = MotorDuty_Con_BackCnt(MotorDutyRef);
+		MotorDutyRef = MotorDuty_Reference(0.31);
+		IR_Motor.Motor0Vol = MotorDutyRef;
+//		IR_Motor.Motor0Vol = MotorDuty_Con_BackCnt(MotorDutyRef);
 
 		/****** Recognize CrossLine ********/
 //		Road_State = BLT.Dashstate;// юс╫ц
@@ -530,13 +530,13 @@ void InfineonRacer_control(void)
 
 		if((IrAvg <= 0.3) && (LaneChange_state == 0))
 		{
-			LaneChange_cnt = 25;
+			Road_cnt = 25;
 			LaneChange_state = 1;
 		}
 		if(LaneChange_state == 1){
-			--LaneChange_cnt;
-			if(LaneChange_cnt == 0){
-				IR_getSrvAngle() = Steer_Control_PD();
+			--Road_cnt;
+			if(Road_cnt == 0){
+//				IR_getSrvAngle() = Steer_Control_PD();
 				Road_State = DASHLINE;
 				LaneChange_state = 0;
 			}
@@ -622,7 +622,15 @@ void InfineonRacer_control(void)
 
 /******************************************* case 5 CrossOut_state********************************************/
 	case 5:
+		if(LaneChange_state == 0){
+			Road_cnt = 30;
+			LaneChange_state = 1;
+		}
+		--Road_cnt;
+		if(Road_cnt == 0){
 		Road_State = NORMAL;
+		LaneChange_state = 0;
+		}
 		break;
 
 /*******************************************AEB_state********************************************/

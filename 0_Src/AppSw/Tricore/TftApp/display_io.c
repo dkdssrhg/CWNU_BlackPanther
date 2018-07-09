@@ -5,6 +5,7 @@
 #include "display_io.h"
 #include "Tft/conio_tft.h"
 #include "Basic.h"
+#include "InfineonRacer.h"
 
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
@@ -58,7 +59,7 @@ void display_io_init(void)
 void display_io_run(void)
 {
     /* setup our name string */
-	conio_ascii_printfxy (DISPLAY_IO1, 0,  4, (uint8 *)" Motor0En : %4d     Motor1En : %4d", IR_getMotor0En(), IR_getMotor1En());
+	conio_ascii_printfxy (DISPLAY_IO1, 0,  4, (uint8 *)" RoadState : %4d     ScanState : %4d", Road_State, SCAN_STATE);
 	conio_ascii_printfxy (DISPLAY_IO1, 0,  5, (uint8 *)" Motor0Vol: %4.2f     Motor1En: %4.2f", IR_getMotor0Vol(), IR_getMotor1Vol());
 	conio_ascii_printfxy (DISPLAY_IO1, 0,  6, (uint8 *)" SrvAngle : %4.2f", IR_getSrvAngle());
 
