@@ -218,12 +218,17 @@ void InfineonRacer_DashLine(void){
 				right_cnt++;
 			}
 		}
-
+	if(Road_State == LANECHANGE){
 	if(left_cnt < right_cnt){
 		DLposition = D_LEFT;
+		left_cnt = 0;
+		right_cnt = 0;
 	}
 	else if(left_cnt > right_cnt){
 		DLposition = D_RIGHT;
+		left_cnt = 0;
+		right_cnt = 0;
+	}
 	}
 
 
@@ -372,7 +377,7 @@ void InfineonRacer_detectLane(void){
 		if (OFFSET < S_START)		OFFSET = S_START;
 		else if (OFFSET > S_FINISH)	OFFSET = S_FINISH;
 
-	else if(Road_State == CROSSIN || Road_State == CROSSOUT || Road_State == LANECHANGE)
+	if(Road_State == CROSSIN || Road_State == CROSSOUT || Road_State == LANECHANGE)
 	{
 		OFFSET = S_CENTER;
 	}
@@ -499,15 +504,16 @@ void InfineonRacer_control(void)
 
 		IR_getSrvAngle() = Steer_Control_PD();
 
-		MotorDutyRef = MotorDuty_Reference(0.31);
+		MotorDutyRef = MotorDuty_Reference(0.3);
 		IR_Motor.Motor0Vol = MotorDutyRef;
 //		IR_Motor.Motor0Vol = MotorDuty_Con_BackCnt(MotorDutyRef);
 
 		/****** Recognize CrossLine ********/
 //		Road_State = BLT.Dashstate;// юс╫ц
 		if(IRon == 1){
-			ActDistance = Cal_volatge(IrAvg);
-			if(ActDistance < 100) Road_State = AEB;
+//			ActDistance = Cal_volatge(IrAvg);
+//			if(ActDistance < 100) Road_State = AEB;
+			if(IrAvg > 0.33) Road_State = AEB;
 		}
 		break;
 
@@ -524,8 +530,8 @@ void InfineonRacer_control(void)
 		MotorDutyRef = MotorDuty_Reference(0.15);
 		IR_Motor.Motor0Vol = MotorDutyRef;
 //		IR_Motor.Motor0Vol = MotorDuty_Con_BackCnt(MotorDutyRef);
-		ActDistance = Cal_volatge(IrAvg);
-		if(ActDistance < 70 ){
+//		ActDistance = Cal_volatge(IrAvg);
+		if(IR_getChn15() > 0.5 ){
 			Road_State = LANECHANGE;
 			IR_getSrvAngle() = (float)DLposition*0.2;
 		}
@@ -582,8 +588,9 @@ void InfineonRacer_control(void)
 //		}
 
 
-		ActDistance = Cal_volatge(IrAvg);
-		if((ActDistance >= 140) && (LaneChange_state == 0))
+//		ActDistance = Cal_volatge(IrAvg);
+//		if((ActDistance >= 140) && (LaneChange_state == 0))
+		if((ActDistance >= 0.15) && (LaneChange_state == 0))
 		{
 			Road_cnt = 25;
 			IR_getSrvAngle() = -0.052;
