@@ -205,9 +205,13 @@ void InfineonRacer_IrScan(void){
 void InfineonRacer_detectLane(void){
 	uint16 Left = 0, Right = 1;
 
-	Left_pre_line = Left_line;
-	Right_pre_line = Right_line;
+	if(Road_State == NORMAL || Road_State == DASHLINE)
+	{
+		InfineonRacer_detectCross();
+	}
 
+	if(Road_State != CROSSIN && Road_State != CROSSOUT)
+	{
 	switch (SCAN_STATE)
 	{
 		case 11:
@@ -324,13 +328,17 @@ void InfineonRacer_detectLane(void){
 
 		default: break;
 	}
-	if (OFFSET < S_START)		OFFSET = S_START;
-	else if (OFFSET > S_FINISH)	OFFSET = S_FINISH;
+		if (OFFSET < S_START)		OFFSET = S_START;
+		else if (OFFSET > S_FINISH)	OFFSET = S_FINISH;
+	}
+	else if(Road_State == CROSSIN || Road_State == CROSSOUT)
+	{
+		OFFSET = S_CENTER;
+	}
+	Left_pre_line = Left_line;
+	Right_pre_line = Right_line;
 
-	if(Road_State == NORMAL || Road_State == DASHLINE)
-		{
-			InfineonRacer_detectCross();
-		}
+
 }
 
 /*******************************************PD control*******************************************/
