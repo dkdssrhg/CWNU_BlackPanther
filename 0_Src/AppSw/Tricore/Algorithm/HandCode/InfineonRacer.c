@@ -128,7 +128,7 @@ uint16 Find_BlackLine(uint16 Start, uint16 Final, uint16 LR)
 			var1 = IR_LineScan.adcResult[1][k]*Percent_n;
 			if (IR_LineScan.adcResult[1][k-skip_n-1] < var1
 					|| IR_LineScan.adcResult[1][k-skip_n-2] < var1)
-			{1
+			{
 				LineK = k;
 				break;
 			}
