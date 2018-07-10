@@ -33,7 +33,11 @@ typedef enum{
 	AEB
 }RoadState_t;
 
-
+typedef enum{
+	D_LEFT = -1,
+	D_NO = 0,
+	D_RIGHT = 1
+}DLposition_t;
 
 /******************************************************************************/
 /*-----------------------------Data Structures--------------------------------*/
@@ -76,6 +80,7 @@ typedef struct{
 /******************************************************************************/
 IFX_EXTERN InfineonRacer_t IR_Ctrl;
 
+IFX_EXTERN uint16 left_cnt,right_cnt;
 
 IFX_EXTERN uint16		SCAN_STATE;
 IFX_EXTERN uint16 		Left_line, Right_line;
@@ -85,6 +90,7 @@ IFX_EXTERN float 		SteerDuty;
 IFX_EXTERN float		var1;
 IFX_EXTERN SteerGain_t  SteerGain;
 IFX_EXTERN RoadState_t  Road_State;
+IFX_EXTERN DLposition_t DLposition;
 
 IFX_EXTERN BLT_t		BLT;
 IFX_EXTERN IrScan_t  	IrScan;

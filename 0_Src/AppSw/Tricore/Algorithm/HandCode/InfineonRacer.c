@@ -13,10 +13,7 @@
 /*--------------------------------Enumerations--------------------------------*/
 /******************************************************************************/
 
-typedef enum{
-	D_LEFT = -1,
-	D_RIGHT = 1
-}DLposition_t;
+
 
 
 /******************************************************************************/
@@ -51,9 +48,12 @@ uint16 L_0 = 19, R_0 = 101;
 sint16 OFFSET;
 uint16 SCAN_STATE;
 uint16 Left_line, Right_line;
+uint16 left_cnt = 0,right_cnt = 0;
 uint16 Left_pre_line = 19, Right_pre_line = 101;
 sint16 BackDutyCnt;
+uint16 lane_reset;
 sint16 ERROR_steer, ERROR_steer_old;
+float rotate;
 
 uint16 skip_n = 1;
 float Percent_n = 0.8; //Num = 13, PercentDen = 16;
@@ -65,6 +65,8 @@ float SteerDuty, SteerDutyMax = 0.17;
 float MotorOn = 1.0;
 float var1;
 float check_motor; //임시 파일
+
+static int alpha =0;
 
 InfineonRacer_t IR_Ctrl  /**< \brief  global data */
 		={64, 64, FALSE  };
@@ -78,7 +80,8 @@ IrScan_t IrScan;
 RoadState_t Road_State;
 DashLine_t DashLine;
 BLT_t BLT;
-DLposition_t DLposition;
+DLposition_t DLposition = D_NO;
+
 
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
@@ -173,7 +176,7 @@ void InfineonRacer_detectCross(void)
 		}
 	}
 
-	if(Black_cnt >= 4 && Change_cnt >= 50)
+	if(Black_cnt >= 4 && Change_cnt >= 25)
 	{
 		switch (Road_State)
 		{
@@ -183,6 +186,7 @@ void InfineonRacer_detectCross(void)
 				break;
 
 			case 3:
+			case 4:
 				Road_State = CROSSOUT;
 				Change_cnt = 0;
 				break;
@@ -195,44 +199,70 @@ void InfineonRacer_detectCross(void)
 }
 
 void InfineonRacer_DashLine(void){
-	int i;
-	uint16 left_cnt = 0,right_cnt = 0;
-	uint32 var;
-	static uint16 Change_cnt = 0;
+//	int i;
+//
+//	uint32 var;
+//	static uint16 Change_cnt = 0;
+//	uint16 left_on = 0,right_on = 0;
+//	Change_cnt++;
+//	if(lane_reset == 0 && OFFSET <64 && OFFSET  > 58 ){
+//	for(i = S_CENTER; i <= R_0 - skip_n - 1; i++)
+//		{
+//			var = IR_LineScan.adcResult[1][i]*Percent_n;
+//			if(IR_LineScan.adcResult[1][i+ skip_n + 1] < var )
+//			{
+//				left_on = 1;
+//				break;
+//			}
+//		}
+//
+//	for(i = S_CENTER; i >= L_0 + skip_n + 1; i--)
+//		{
+//			var = IR_LineScan.adcResult[1][i]*Percent_n;
+//			if(IR_LineScan.adcResult[1][i- skip_n - 1] < var)
+//			{
+//				right_on = 1;
+//				break;
+//			}
+//		}
+//	if(right_on > left_on){
+//		right_cnt++;
+//	}
+//	else if(right_on < left_on){
+//		left_cnt++;
+//	}
+//}
+	int k;
+	static int L_cnt=0, R_cnt=0;
 
-	Change_cnt++;
-	for(i = S_CENTER; i <= R_0 - skip_n - 1; i++)
+	if((Left_line <= Left_pre_line +2) && (Left_line >= Left_pre_line -2))
+	{
+		L_cnt++;
+	}
+	if((Right_line <= Right_pre_line +2) && (Right_line >= Right_pre_line -2))
+	{
+		R_cnt++;
+	}
+
+	if(L_cnt >= 7 || R_cnt >= 7)
+	{
+		if(R_cnt > L_cnt)
 		{
-			var = IR_LineScan.adcResult[1][i]*Percent_n;
-			if(IR_LineScan.adcResult[1][i+ skip_n + 1] < var)
-			{
-				left_cnt++;
-			}
+			DLposition = D_LEFT;
+			L_cnt = 0;
+			R_cnt = 0;
 		}
-
-	for(i = S_CENTER; i >= L_0 + skip_n + 1; i--)
+		else if(L_cnt > R_cnt)
 		{
-			var = IR_LineScan.adcResult[1][i]*Percent_n;
-			if(IR_LineScan.adcResult[1][i- skip_n - 1] < var)
-			{
-				right_cnt++;
-			}
+			DLposition = D_RIGHT;
+			L_cnt = 0;
+			R_cnt = 0;
 		}
-	if(Road_State == LANECHANGE){
-	if(left_cnt < right_cnt){
-		DLposition = D_LEFT;
-		left_cnt = 0;
-		right_cnt = 0;
 	}
-	else if(left_cnt > right_cnt){
-		DLposition = D_RIGHT;
-		left_cnt = 0;
-		right_cnt = 0;
-	}
-	}
-
-
 }
+
+
+
 void InfineonRacer_IrScan(void){
 	uint32 i;
 	for(i = 0;i <= 19;){
@@ -248,16 +278,14 @@ void InfineonRacer_IrScan(void){
 void InfineonRacer_detectLane(void){
 	uint16 Left = 0, Right = 1;
 
+	Left_pre_line = Left_line;
+	Right_pre_line = Right_line;
 	if(Road_State == NORMAL || Road_State == DASHLINE)
 	{
 		InfineonRacer_detectCross();
 	}
 
-	if(Road_State == DASHLINE)
-	{
-	  InfineonRacer_DashLine();
-	}
-
+	if(Road_State == NORMAL || Road_State == DASHLINE){
 	switch (SCAN_STATE)
 	{
 		case 11:
@@ -376,15 +404,40 @@ void InfineonRacer_detectLane(void){
 	}
 		if (OFFSET < S_START)		OFFSET = S_START;
 		else if (OFFSET > S_FINISH)	OFFSET = S_FINISH;
-
-	if(Road_State == CROSSIN || Road_State == CROSSOUT || Road_State == LANECHANGE)
-	{
-		OFFSET = S_CENTER;
 	}
-	Left_pre_line = Left_line;
-	Right_pre_line = Right_line;
 
-
+		if(Road_State == DASHLINE )
+			{
+			  InfineonRacer_DashLine();
+			}
+//
+//			if(Road_State == LANECHANGE && lane_reset == 0){
+//				if(left_cnt < right_cnt){
+//					DLposition = D_LEFT;
+//					left_cnt = 0;
+//					right_cnt = 0;
+//				}
+//				else if(left_cnt > right_cnt){
+//					DLposition = D_RIGHT;
+//					left_cnt = 0;
+//					right_cnt = 0;
+//				}
+//			}
+//
+//			if(lane_reset == 1 && DLposition == D_LEFT){
+//				DLposition = D_RIGHT;
+//			}
+//			else if(lane_reset == 1 && DLposition == D_RIGHT){
+//				DLposition = D_LEFT;
+//			}
+//
+//
+//	if(Road_State == CROSSIN || Road_State == CROSSOUT || Road_State == LANECHANGE)
+//	{
+//		OFFSET = S_CENTER;
+//	}
+//
+//
 }
 
 /*******************************************PD control*******************************************/
@@ -513,7 +566,7 @@ void InfineonRacer_control(void)
 		if(IRon == 1){
 //			ActDistance = Cal_volatge(IrAvg);
 //			if(ActDistance < 100) Road_State = AEB;
-			if(IrAvg > 0.33) Road_State = AEB;
+			if(IrAvg > 0.2) Road_State = AEB;
 		}
 		break;
 
@@ -521,6 +574,7 @@ void InfineonRacer_control(void)
 	case 2:
 //		IR_Motor.Motor0Vol = 0.15;
 		Road_State = DASHLINE;
+		lane_reset = 0;
 		break;
 
 /*******************************************case 3 DashLine_state********************************************/
@@ -531,9 +585,11 @@ void InfineonRacer_control(void)
 		IR_Motor.Motor0Vol = MotorDutyRef;
 //		IR_Motor.Motor0Vol = MotorDuty_Con_BackCnt(MotorDutyRef);
 //		ActDistance = Cal_volatge(IrAvg);
-		if(IR_getChn15() > 0.5 ){
+		alpha = 1;
+		if( 0.4 < IrAvg ){
 			Road_State = LANECHANGE;
-			IR_getSrvAngle() = (float)DLposition*0.2;
+			LaneChange_state = 4;
+			alpha = 0;
 		}
 		break;
 
@@ -586,29 +642,42 @@ void InfineonRacer_control(void)
 //				break;
 //			}
 //		}
-
-
 //		ActDistance = Cal_volatge(IrAvg);
 //		if((ActDistance >= 140) && (LaneChange_state == 0))
-		if((ActDistance >= 0.15) && (LaneChange_state == 0))
+
+
+		if( (DLposition == D_LEFT || DLposition == D_RIGHT) && LaneChange_state == 4 && alpha != 1)
 		{
-			Road_cnt = 25;
-			IR_getSrvAngle() = -0.052;
+			IR_getSrvAngle() = (float)DLposition*0.2 - 0.052;
 			LaneChange_state = 1;
+			alpha = 0;
+		}
+		if((IrAvg <= 0.05) && (LaneChange_state == 1))
+		{
+			Road_cnt = 27;
+			IR_getSrvAngle() = -0.052;
+			LaneChange_state = 2;
 		}
 
 
 		if(Road_cnt == 0){
 			switch(LaneChange_state){
-				case 1 :
-					Road_cnt = 25;
-					IR_getSrvAngle() = (float)DLposition*(-0.2);
-					LaneChange_state = 2;
-					break;
 				case 2 :
-					Road_State = DASHLINE;
-					LaneChange_state = 0;
+					Road_cnt = 25;
+					IR_getSrvAngle() = (float)DLposition*(-0.2) - 0.052;
+					LaneChange_state = 3;
+					alpha = 1;
 					break;
+				case 3 :
+					Road_State = DASHLINE;
+					LaneChange_state = 4;
+					alpha = 1;
+//					lane_reset = 1;
+//					left_cnt = 0;
+//					right_cnt = 0;
+//					LaneChange_state = 0;
+					break;
+				default: break;
 			}
 		}
 		Road_cnt--;
@@ -693,15 +762,16 @@ void InfineonRacer_control(void)
 
 /******************************************* case 5 CrossOut_state********************************************/
 	case 5:
-		if(LaneChange_state == 0){
+		if(alpha == 1){
 			Road_cnt = 30;
 			IR_getSrvAngle() = -0.052;
-			LaneChange_state = 1;
+			LaneChange_state = 4;
+			alpha = 0;
 		}
 		--Road_cnt;
 		if(Road_cnt == 0){
 		Road_State = NORMAL;
-		LaneChange_state = 0;
+//		LaneChange_state = 4;
 		IRon = 1;
 		}
 		break;

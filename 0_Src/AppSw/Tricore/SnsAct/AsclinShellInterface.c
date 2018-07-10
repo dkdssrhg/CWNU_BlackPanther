@@ -917,9 +917,10 @@ void AsclinShellInterface_ShowIrAvg(void)
  			cnt = (sint32) g_IrScan.period_ms/20;
 			IfxStdIf_DPipe_print(&g_AsclinShellInterface.stdIf.asc, "Sensor Value : ");
 // 			for(i = 0;i <= 19;){
-//				IfxStdIf_DPipe_print(&g_AsclinShellInterface.stdIf.asc, "[%4.2f],",IR_Result[i]);
+//				IfxStdIf_DPipe_print(&g_AsclinShellInterface.stdIf.asc, "[%4.2f],",IR_Result[i]);left_cnt,right_cnt;
 // 			}
 			IfxStdIf_DPipe_print(&g_AsclinShellInterface.stdIf.asc, ENDL"  Ir Avg Value: %4.2f"ENDL,IrScan.fltIrAvg);
+			IfxStdIf_DPipe_print(&g_AsclinShellInterface.stdIf.asc, ENDL"  LEFT_CNT: %d 	RIGHT_CNT: %d"ENDL,left_cnt,right_cnt);
 
 			}
 
