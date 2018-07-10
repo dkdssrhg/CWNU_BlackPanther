@@ -234,7 +234,7 @@ void InfineonRacer_DashLine(void){
 //}
 	int k;
 	static int L_cnt=0, R_cnt=0;
-
+	if(lane_reset == 1){
 	if((Left_line <= Left_pre_line +2) && (Left_line >= Left_pre_line -2))
 	{
 		L_cnt++;
@@ -257,6 +257,15 @@ void InfineonRacer_DashLine(void){
 			DLposition = D_RIGHT;
 			L_cnt = 0;
 			R_cnt = 0;
+		}
+	}
+	}
+	else if(lane_reset == 0){
+		if(DLposition == D_LEFT){
+			DLposition = D_RIGHT;
+		}
+		else if(DLposition == D_RIGHT){
+			DLposition = D_LEFT;
 		}
 	}
 }
@@ -574,7 +583,7 @@ void InfineonRacer_control(void)
 	case 2:
 //		IR_Motor.Motor0Vol = 0.15;
 		Road_State = DASHLINE;
-		lane_reset = 0;
+		lane_reset = 1;
 		break;
 
 /*******************************************case 3 DashLine_state********************************************/
@@ -586,8 +595,9 @@ void InfineonRacer_control(void)
 //		IR_Motor.Motor0Vol = MotorDuty_Con_BackCnt(MotorDutyRef);
 //		ActDistance = Cal_volatge(IrAvg);
 		alpha = 1;
-		if( 0.4 < IrAvg ){
+		if( 0.3 < IrAvg ){
 			Road_State = LANECHANGE;
+			lane_reset = 0;
 			LaneChange_state = 4;
 			alpha = 0;
 		}
@@ -648,13 +658,14 @@ void InfineonRacer_control(void)
 
 		if( (DLposition == D_LEFT || DLposition == D_RIGHT) && LaneChange_state == 4 && alpha != 1)
 		{
-			IR_getSrvAngle() = (float)DLposition*0.2 - 0.052;
+			IR_getSrvAngle() = (float)DLposition*0.16 - 0.052;
+			IR_Motor.Motor0Vol = 0.13;
 			LaneChange_state = 1;
 			alpha = 0;
 		}
 		if((IrAvg <= 0.05) && (LaneChange_state == 1))
 		{
-			Road_cnt = 27;
+			Road_cnt = 40;
 			IR_getSrvAngle() = -0.052;
 			LaneChange_state = 2;
 		}
@@ -664,7 +675,7 @@ void InfineonRacer_control(void)
 			switch(LaneChange_state){
 				case 2 :
 					Road_cnt = 25;
-					IR_getSrvAngle() = (float)DLposition*(-0.2) - 0.052;
+					IR_getSrvAngle() = (float)DLposition*(-0.16) - 0.052;
 					LaneChange_state = 3;
 					alpha = 1;
 					break;
